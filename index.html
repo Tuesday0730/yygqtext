@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>趣味测试：测测你最像阴阳怪气里的谁</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif;margin:0;padding:0}
+body{background:#f7f8fa;color:#222;padding:20px;max-width:800px;margin:0 auto}
+.title{text-align:center;margin-bottom:24px}
+.question{background:#fff;padding:18px;border-radius:12px;margin-bottom:16px;box-shadow:0 2px 8px #00000010}
+.q-title{font-weight:bold;margin-bottom:12px}
+.opt-item{padding:10px 12px;margin:8px 0;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;transition:0.2s}
+.opt-item:hover{background:#eff6ff;border-color:#93c5fd}
+.opt-item.selected{background:#dbeafe;border-color:#3b82f6}
+#submitBtn{width:100%;padding:14px;background:#3b82f6;color:#fff;border:none;border-radius:10px;font-size:18px;margin-top:20px;cursor:pointer}
+#resultBox{display:none;background:#fff;padding:24px;border-radius:12px;margin-top:20px;box-shadow:0 2px 8px #00000010}
+</style>
+</head>
+<body>
+<div class="title">
+<h1>趣味测试：测测你最像阴阳怪气里的谁</h1>
+<p>一共25题，请凭第一直觉选择，选项顺序每次打开都会打乱哦</p>
+</div>
+<div id="quizWrap"></div>
+<button id="submitBtn">查看测试结果</button>
+<div id="resultBox"></div>
+
+<script>
+// 角色定义
+const roles = {
+  lex: {name:"LexBurner 蕾丝",desc:"你是团里的人间清醒毒舌担当！三观超正、逻辑满分，看人看事一针见血，不矫情、不内耗、不盲从。你自带清冷疏离感，有自己的原则和底线，敢于直言不讳，看似毒舌犀利，实则内心通透善良，看透世事却依旧保持本心。做事理智果断，从不勉强自己迎合他人，是身边人最靠谱的清醒军师。"},
+  huabei: {name:"花少北",desc:"你是团里的温柔细腻治愈担当！天生共情力拉满，性格柔软慢热，有点小社恐、小敏感，容易胡思乱想、悄悄内耗。你待人温柔心软，极其体贴他人，不擅长争执和拒绝，习惯把委屈藏在心里。自带干净纯粹的少年感，温柔又易碎，治愈身边所有人，是大家都想守护的温柔存在。"},
+  lafanqie: {name:"老番茄",desc:"你是团里的全能靠谱核心担当！极致自律、稳重成熟、温柔强大，做事踏实认真、有分寸、有格局。遇事冷静从容，擅长统筹全局、解决问题，待人谦逊低调，从不张扬炫耀。你自带安全感，不管是朋友还是团队，有你在就无比安心，是默默努力、稳步发光的实力派，妥妥的人生赢家人设。"},
+  mohuan: {name:"某幻君",desc:"你是团里的松弛洒脱氛围感担当！性格自由随性、不拘小节，幽默通透、梗多话多，自带独特的氛围感。你看淡得失、心态松弛，不较真、不紧绷，擅长调节气氛、化解尴尬。看似随性摆烂，实则内心通透清醒，活得自在洒脱，温柔又自由，是人群中最亮眼的趣味灵魂。"},
+  chinaBoy: {name:"中国Boy超级大猩猩",desc:"你是团里的阳光憨憨快乐担当！性格纯粹直白、大大咧咧，阳光元气、真诚善良，没有任何心机和套路。你待人热情随和，超好相处，心软又单纯，极易满足，主打无忧无虑、快乐至上。偶尔有点憨憨呆萌，容易被调侃，但永远真诚待人，是团队里的开心果，治愈所有不开心。"}
+};
+
+// 25道题目，每个选项绑定对应角色key
+const questions = [
+{q:"1、和朋友吵架时，你的第一反应是？",opts:[
+  {txt:"快速理清对错，直言不讳指出问题，不迁就矫情",r:"lex"},
+  {txt:"默默沉默难过，不想争执，等对方主动缓和气氛",r:"huabei"},
+  {txt:"冷静沟通，换位思考，尽量体面化解矛盾、顾全大局",r:"lafanqie"},
+  {txt:"轻松调侃化解尴尬，不愿纠结对错，主打一个随缘",r:"mohuan"},
+  {txt:"立马服软认错，怕气氛尴尬，主打憨厚随和",r:"chinaBoy"},
+]},
+{q:"2、朋友约你临时出门，你刚好在偷懒摸鱼，你会？",opts:[
+  {txt:"不想动就直接拒绝，绝不勉强自己迎合别人",r:"lex"},
+  {txt:"纠结犹豫半天，不好意思拒绝，又不想出门",r:"huabei"},
+  {txt:"合理安排时间，把手头小事收尾再准时赴约",r:"lafanqie"},
+  {txt:"看心情！心情好立马冲，心情不好直接摆烂拒绝",r:"mohuan"},
+  {txt:"二话不说答应，出门主打陪伴，快乐最重要",r:"chinaBoy"},
+]},
+{q:"3、面对别人无脑杠精吐槽，你的态度是？",opts:[
+  {txt:"精准回怼，逻辑碾压，毒舌拆解对方漏洞",r:"lex"},
+  {txt:"懒得争辩，心里不爽但只会默默远离",r:"huabei"},
+  {txt:"无视忽略，不浪费时间在无意义争执上",r:"lafanqie"},
+  {txt:"佛系调侃，一笑而过，主打一个松弛通透",r:"mohuan"},
+  {txt:"一脸懵圈，完全不知道怎么回，干脆不说话",r:"chinaBoy"},
+]},
+{q:"4、做事情的核心风格更偏向于？",opts:[
+  {txt:"理智清醒，目标明确，极度拎得清利弊",r:"lex"},
+  {txt:"细腻敏感，注重感受，跟着心情走",r:"huabei"},
+  {txt:"自律踏实，极致靠谱，凡事追求完美稳妥",r:"lafanqie"},
+  {txt:"自由随性，不拘小节，喜欢松弛不紧绷的状态",r:"mohuan"},
+  {txt:"简单直接，大大咧咧，做事不纠结不内耗",r:"chinaBoy"},
+]},
+{q:"5、团队合作中，你更适合扮演的角色是？",opts:[
+  {txt:"吐槽担当+清醒军师，指出问题、规避漏洞",r:"lex"},
+  {txt:"氛围调和者，温柔包容，照顾所有人情绪",r:"huabei"},
+  {txt:"核心主导者，统筹全局，把控进度和结果",r:"lafanqie"},
+  {txt:"创意活跃者，整活造梗，带动团队气氛",r:"mohuan"},
+  {txt:"踏实执行者，听话配合，认真完成分配任务",r:"chinaBoy"},
+]},
+{q:"6、空闲一整天，你更愿意怎么度过？",opts:[
+  {txt:"独处追剧、刷资讯，享受独立安静的个人空间",r:"lex"},
+  {txt:"宅家发呆、听歌追剧，安安静静消磨时间",r:"huabei"},
+  {txt:"学习、规划琐事，提升自己，不虚度时光",r:"lafanqie"},
+  {txt:"打游戏、整活玩乐，怎么开心怎么来",r:"mohuan"},
+  {txt:"约朋友玩耍、出门溜达，热闹一点更舒服",r:"chinaBoy"},
+]},
+{q:"7、被别人误会时，你会？",opts:[
+  {txt:"当场解释清楚，三观清晰，绝不背莫名的锅",r:"lex"},
+  {txt:"委屈憋在心里，越想越难过，不会主动辩解",r:"huabei"},
+  {txt:"冷静说明情况，坦然面对，清者自清不纠结",r:"lafanqie"},
+  {txt:"随缘看淡，懂你的人不用解释，不懂的不必多说",r:"mohuan"},
+  {txt:"手足无措，慌忙解释，生怕别人讨厌自己",r:"chinaBoy"},
+]},
+{q:"8、你的性格最大的闪光点是？",opts:[
+  {txt:"人间清醒、通透犀利，看人看事一针见血",r:"lex"},
+  {txt:"温柔心软、细腻共情，自带治愈感",r:"huabei"},
+  {txt:"稳重自律、温柔强大，靠谱又有分寸",r:"lafanqie"},
+  {txt:"洒脱松弛、幽默通透，自带氛围感",r:"mohuan"},
+  {txt:"阳光纯粹、憨厚真诚，待人毫无保留",r:"chinaBoy"},
+]},
+{q:"9、遇到难题瓶颈，你的状态是？",opts:[
+  {txt:"冷静分析问题，快速找解决方案，绝不内耗",r:"lex"},
+  {txt:"容易焦虑emo，情绪先上头，迟迟不敢行动",r:"huabei"},
+  {txt:"循序渐进攻克，耐心坚持，直到解决问题",r:"lafanqie"},
+  {txt:"摆烂一会再发力，主打劳逸结合、松弛应对",r:"mohuan"},
+  {txt:"求助身边人，不会硬扛，心态乐观不钻牛角尖",r:"chinaBoy"},
+]},
+{q:"10、和不熟的人相处，你会？",opts:[
+  {txt:"礼貌疏离，保持边界感，不刻意社交讨好",r:"lex"},
+  {txt:"慢热腼腆，安静内敛，有点社恐放不开",r:"huabei"},
+  {txt:"得体大方，礼貌周到，分寸感十足",r:"lafanqie"},
+  {txt:"主动破冰，幽默健谈，轻松拿捏社交氛围",r:"mohuan"},
+  {txt:"热情直白，傻傻真诚，很快就能融入氛围",r:"chinaBoy"},
+]},
+{q:"11、别人过度麻烦你，你会？",opts:[
+  {txt:"果断拒绝，有底线有原则，不懂迁就烂好人",r:"lex"},
+  {txt:"不好意思拒绝，勉强自己帮忙，事后暗自难受",r:"huabei"},
+  {txt:"量力而行，能帮则帮，超出底线就委婉拒绝",r:"lafanqie"},
+  {txt:"看心情和关系，随性抉择，不勉强自己",r:"mohuan"},
+  {txt:"基本不会拒绝，心软好说话，容易吃亏",r:"chinaBoy"},
+]},
+{q:"12、你的穿搭和审美风格更偏向？",opts:[
+  {txt:"简约干练、清冷高级，低调有质感",r:"lex"},
+  {txt:"温柔干净、软糯休闲，清新治愈",r:"huabei"},
+  {txt:"大方得体、简约百搭，稳重耐看",r:"lafanqie"},
+  {txt:"潮流随性、小众个性，松弛有态度",r:"mohuan"},
+  {txt:"休闲舒适、阳光活力，简单接地气",r:"chinaBoy"},
+]},
+{q:"13、玩游戏时的真实状态是？",opts:[
+  {txt:"理智复盘，注重策略，吐槽队友操作离谱",r:"lex"},
+  {txt:"佛系游玩，输赢无所谓，心态平和但容易自闭",r:"huabei"},
+  {txt:"认真对待，尽力打好，不摆烂不抱怨",r:"lafanqie"},
+  {txt:"主打整活娱乐，输赢随缘，开心最重要",r:"mohuan"},
+  {txt:"娱乐为主，技术随缘，经常被队友调侃",r:"chinaBoy"},
+]},
+{q:"14、面对别人的夸奖，你会？",opts:[
+  {txt:"坦然接受，不卑不亢，清楚自己的优势",r:"lex"},
+  {txt:"害羞腼腆，不知所措，默默开心",r:"huabei"},
+  {txt:"谦虚回应，低调内敛，不骄不躁",r:"lafanqie"},
+  {txt:"顺势整活，幽默接梗，氛围拉满",r:"mohuan"},
+  {txt:"真诚道谢，傻乎乎开心，特别容易满足",r:"chinaBoy"},
+]},
+{q:"15、面对突发意外状况，你的反应是？",opts:[
+  {txt:"快速冷静，精准判断，立刻处理问题",r:"lex"},
+  {txt:"慌乱忐忑，容易胡思乱想，情绪被动",r:"huabei"},
+  {txt:"沉稳应对，有条不紊，妥善收拾残局",r:"lafanqie"},
+  {txt:"短暂慌乱后释怀，随缘应对，不慌不忙",r:"mohuan"},
+  {txt:"一脸茫然，需要别人带动节奏",r:"chinaBoy"},
+]},
+{q:"16、你更讨厌哪种相处模式？",opts:[
+  {txt:"矫情内耗、双标虚伪、毫无逻辑的人",r:"lex"},
+  {txt:"冷漠敷衍、说话伤人、不懂得体谅别人",r:"huabei"},
+  {txt:"浮躁潦草、不负责任、做事没有分寸",r:"lafanqie"},
+  {txt:"死板压抑、过度较真、毫无松弛感",r:"mohuan"},
+  {txt:"勾心斗角、复杂算计、套路满满",r:"chinaBoy"},
+]},
+{q:"17、朋友圈的人设更接近？",opts:[
+  {txt:"清醒独立、人间通透，偶尔毒舌吐槽",r:"lex"},
+  {txt:"温柔安静、细腻柔软，自带易碎感",r:"huabei"},
+  {txt:"优秀自律、低调靠谱、稳步发光",r:"lafanqie"},
+  {txt:"有趣松弛、随性自由、梗多话多",r:"mohuan"},
+  {txt:"阳光开朗、简单纯粹、元气满满",r:"chinaBoy"},
+]},
+{q:"18、做选择时，你通常？",opts:[
+  {txt:"果断坚定，遵从本心，不犹豫不纠结",r:"lex"},
+  {txt:"反复纠结，害怕选错，容易内耗焦虑",r:"huabei"},
+  {txt:"深思熟虑，权衡利弊，做出最优选择",r:"lafanqie"},
+  {txt:"随心选择，主打一个缘分，不纠结结果",r:"mohuan"},
+  {txt:"随缘跟风，听朋友建议，懒得自己思考",r:"chinaBoy"},
+]},
+{q:"19、对待生活的态度是？",opts:[
+  {txt:"清醒自律，看透本质，不盲从世俗",r:"lex"},
+  {txt:"温柔度日，接纳情绪，慢节奏生活",r:"huabei"},
+  {txt:"积极上进，稳步前行，永远稳步提升",r:"lafanqie"},
+  {txt:"松弛自由，活在当下，及时行乐",r:"mohuan"},
+  {txt:"简单快乐，无忧无虑，知足常乐",r:"chinaBoy"},
+]},
+{q:"20、和好朋友闹别扭冷战，你会？",opts:[
+  {txt:"等对方态度，不主动讨好，对错分明",r:"lex"},
+  {txt:"偷偷难过，默默等待，不敢主动破冰",r:"huabei"},
+  {txt:"主动沟通，化解隔阂，珍惜情谊",r:"lafanqie"},
+  {txt:"过两天自动和好，根本记不住矛盾",r:"mohuan"},
+  {txt:"忍不住主动找对方，不想冷战疏远",r:"chinaBoy"},
+]},
+{q:"21、你最擅长的社交技能是？",opts:[
+  {txt:"精准吐槽、理性点评，看透一切套路",r:"lex"},
+  {txt:"温柔倾听、共情陪伴，治愈身边人",r:"huabei"},
+  {txt:"周全处事、拿捏分寸，让人安心",r:"lafanqie"},
+  {txt:"造梗整活、活跃气氛，自带笑点",r:"mohuan"},
+  {txt:"真诚待人、暖心陪伴，亲和力拉满",r:"chinaBoy"},
+]},
+{q:"22、面对压力和内卷，你会？",opts:[
+  {txt:"清醒摆烂，拒绝无效内卷，专注自我节奏",r:"lex"},
+  {txt:"容易焦虑内耗，悄悄承压，自我消化情绪",r:"huabei"},
+  {txt:"化压力为动力，稳步努力，从容应对内卷",r:"lafanqie"},
+  {txt:"佛系躺平，松弛调节，不被压力裹挟",r:"mohuan"},
+  {txt:"心态乐观，转移注意力，很快释怀",r:"chinaBoy"},
+]},
+{q:"23、你的说话风格更偏向？",opts:[
+  {txt:"犀利直白、逻辑清晰，毒舌但真实",r:"lex"},
+  {txt:"温柔轻声、细腻柔软，语气舒缓",r:"huabei"},
+  {txt:"沉稳温和、有理有据，成熟稳重",r:"lafanqie"},
+  {txt:"幽默随性、松弛洒脱，自带氛围感",r:"mohuan"},
+  {txt:"直白可爱、憨憨真诚，简单接地气",r:"chinaBoy"},
+]},
+{q:"24、如果组队旅行，你更想成为？",opts:[
+  {txt:"清醒避雷担当，规避坑点，理性规划",r:"lex"},
+  {txt:"氛围温柔担当，照顾大家情绪，随遇而安",r:"huabei"},
+  {txt:"全能攻略担当，做好规划，安排好一切行程",r:"lafanqie"},
+  {txt:"快乐整活担当，负责搞笑，制造欢乐瞬间",r:"mohuan"},
+  {txt:"乖乖跟随担当，听话配合，主打快乐陪伴",r:"chinaBoy"},
+]},
+{q:"25、你身上最明显的小特质是？",opts:[
+  {txt:"嘴毒心软、清醒独立、极度理智",r:"lex"},
+  {txt:"敏感温柔、慢热内敛、共情力超强",r:"huabei"},
+  {txt:"自律靠谱、成熟稳重、温柔且强大",r:"lafanqie"},
+  {txt:"随性洒脱、幽默松弛、不拘小节",r:"mohuan"},
+  {txt:"阳光憨厚、纯粹真诚、元气治愈",r:"chinaBoy"},
+]}
+];
+
+// 数组打乱函数
+function shuffle(arr){
+  let a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+const wrap=document.getElementById("quizWrap");
+const resultBox=document.getElementById("resultBox");
+const submitBtn=document.getElementById("submitBtn");
+let answers={};
+
+// 渲染所有题目，每题选项打乱
+questions.forEach((item,idx)=>{
+  const div=document.createElement("div");
+  div.className="question";
+  div.innerHTML=`<div class="q-title">${item.q}</div>`;
+  const shuffledOpts=shuffle(item.opts);
+  shuffledOpts.forEach(opt=>{
+    const optEl=document.createElement("div");
+    optEl.className="opt-item";
+    optEl.innerText=opt.txt;
+    optEl.onclick=()=>{
+      div.querySelectorAll(".opt-item").forEach(o=>o.classList.remove("selected"));
+      optEl.classList.add("selected");
+      answers[idx]=opt.r;
+    }
+    div.appendChild(optEl);
+  })
+  wrap.appendChild(div);
+})
+
+submitBtn.onclick=()=>{
+  if(Object.keys(answers).length <25){
+    alert("还有题目没有做完哦，请全部选择！");
+    return;
+  }
+  const score={lex:0,huabei:0,lafanqie:0,mohuan:0,chinaBoy:0};
+  Object.values(answers).forEach(r=>score[r]++);
+  // 找最高分
+  let maxVal=Math.max(...Object.values(score));
+  let topList=Object.entries(score).filter(([k,v])=>v===maxVal).map(x=>x[0]);
+  let html="";
+  if(topList.length===1){
+    const res=roles[topList[0]];
+    html=`<h2>🎉你的结果：${res.name}</h2><p style="margin-top:12px;line-height:1.7">${res.desc}</p>`;
+  }else{
+    html=`<h2>🎉你的结果：混合特质！</h2><p style="margin-top:12px">你同时拥有：${topList.map(k=>roles[k].name).join("、")}</p>
+    <p style="line-height:1.7">分数持平，代表你融合了多位阴阳怪气成员的性格，既有多重魅力！</p>`;
+  }
+  html += `<div style="margin-top:16px"><small>分数统计：<br>
+LexBurner:${score.lex}｜花少北:${score.huabei}｜老番茄:${score.lafanqie}｜某幻君:${score.mohuan}｜中国Boy:${score.chinaBoy}</small></div>`;
+  resultBox.innerHTML=html;
+  resultBox.style.display="block";
+  resultBox.scrollIntoView();
+}
+</script>
+</body>
+</html>
